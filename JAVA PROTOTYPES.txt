@@ -1,0 +1,240 @@
+JAVA PROTOTYPES
+
+1)CODE 1
+
+import com.google.api.services.sheets.v4.Sheets;
+import com.google.api.services.sheets.v4.model.*;
+import com.google.auth.http.HttpCredentialsAdapter;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.auth.oauth2.ServiceAccountCredentials;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collections;
+import java.util.List;
+
+public class GoogleSheetsExample {
+
+    private static final String SPREADSHEET_ID = "your-spreadsheet-id";
+
+    public static void main(String[] args) throws IOException {
+        InputStream credentialsStream = GoogleSheetsExample.class.getResourceAsStream("/path/to/your/service/account/key.json");
+        GoogleCredentials credentials = ServiceAccountCredentials.fromStream(credentialsStream);
+
+        // Use the recommended HttpCredentialsAdapter
+        credentials = credentials.createScoped(Collections.singletonList("https://www.googleapis.com/auth/spreadsheets"));
+        HttpCredentialsAdapter httpCredentialsAdapter = new HttpCredentialsAdapter(credentials);
+
+        Sheets sheetsService = new Sheets.Builder(httpCredentialsAdapter.getHttpTransport(),
+                httpCredentialsAdapter.getJsonFactory(), httpCredentialsAdapter)
+                .setApplicationName("Your Application Name")
+                .build();
+
+        // Existing data
+        ValueRange response = sheetsService.spreadsheets().values()
+                .get(SPREADSHEET_ID, "Sheet1")
+                .execute();
+        List<List<Object>> existingData = response.getValues();
+
+        System.out.println("Existing Data in Google Sheet:");
+        existingData.forEach(row -> System.out.println(row));
+
+        // User input
+        String email = "example@email.com"; // Replace with your email input logic
+        String password = "examplepassword"; // Replace with your password input logic
+
+        // Append new data
+        ValueRange requestBody = new ValueRange()
+                .setValues(Collections.singletonList(Collections.singletonList(email + ", " + password)));
+        AppendValuesResponse appendValuesResponse = sheetsService.spreadsheets().values()
+                .append(SPREADSHEET_ID, "Sheet1", requestBody)
+                .setValueInputOption("RAW")
+                .execute();
+
+        // Updated data
+        response = sheetsService.spreadsheets().values()
+                .get(SPREADSHEET_ID, "Sheet1")
+                .execute();
+        List<List<Object>> updatedData = response.getValues();
+
+        System.out.println("\nAll Data in Google Sheet:");
+        updatedData.forEach(row -> System.out.println(row));
+
+        System.out.println(appendValuesResponse.getUpdates().getUpdatedRows() > 0
+                ? "Data added successfully to the Google Sheet."
+                : "Failed to add data to the Google Sheet.");
+    }
+}
+
+
+2)CODE 2
+
+import com.google.maps.GeoApiContext;
+import com.google.maps.PlacesApi;
+import com.google.maps.model.LatLng;
+import com.google.maps.model.PlaceType;
+import com.google.maps.model.PlacesSearchResponse;
+import com.google.maps.model.PlacesSearchResult;
+
+public class GooglePlacesExample {
+
+    public static void main(String[] args) {
+        String apiKey = "AIzaSyBj-F7jxbhMYXYn8WuLwZpnEInBX6S4Dew";
+        GeoApiContext context = new GeoApiContext.Builder().apiKey(apiKey).build();
+
+        try {
+            LatLng location = new LatLng(28.4089, 77.3178);
+            PlacesSearchResponse response = PlacesApi.nearbySearchQuery(context, location)
+                    .radius(5000)
+                    .type(PlaceType.HOSPITAL)
+                    .await();
+
+            for (PlacesSearchResult place : response.results) {
+                System.out.println("Name: " + place.name);
+                System.out.println("Latitude: " + place.geometry.location.lat);
+                System.out.println("Longitude: " + place.geometry.location.lng);
+                System.out.println();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+3)CODE 3
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Iterator;
+
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+public class GoogleSheetLogin {
+
+    public static void main(String[] args) throws IOException {
+        FileInputStream serviceAccount = new FileInputStream("path/to/your/hack1-416713-16398c46c7ba.json");
+
+        // Initialize Google Sheets API
+        GoogleCredential credentials = GoogleCredential.fromStream(serviceAccount)
+                .createScoped(Collections.singleton(SheetsScopes.SPREADSHEETS_READONLY));
+
+        // Create Google Sheets service
+        Sheets sheetsService = new Sheets.Builder(GoogleNetHttpTransport.newTrustedTransport(),
+                JacksonFactory.getDefaultInstance(), credentials)
+                .setApplicationName("Your Application Name").build();
+
+        // Define the spreadsheet ID and range
+        String spreadsheetId = "1";
+        String range = "Sheet1"; // Assuming your data is in the first sheet
+
+        // Retrieve the spreadsheet
+        ValueRange response = sheetsService.spreadsheets().values().get(spreadsheetId, range).execute();
+
+        List<List<Object>> values = response.getValues();
+
+        if (values == null || values.isEmpty()) {
+            System.out.println("No data found.");
+        } else {
+            System.out.println("Existing Data in Google Sheet:");
+            for (List<Object> row : values) {
+                System.out.println(row);
+            }
+        }
+
+        // Get user input for email and password
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter Email for Login: ");
+        String loginEmail = scanner.nextLine().trim();
+
+        System.out.print("Enter Password for Login: ");
+        String loginPassword = scanner.nextLine().trim();
+
+        // Check if login credentials are valid
+        boolean loginSuccessful = isLoginSuccessful(values, loginEmail, loginPassword);
+
+        if (loginSuccessful) {
+            System.out.println("Login successful!");
+        } else {
+            System.out.println("Login failed. Incorrect email or password.");
+        }
+    }
+
+    private static boolean isLoginSuccessful(List<List<Object>> values, String loginEmail, String loginPassword) {
+        for (List<Object> row : values) {
+            if (row.size() >= 2 && row.get(0).toString().equals(loginEmail) && row.get(1).toString().equals(loginPassword)) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Iterator;
+
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+public class GoogleSheetLogin {
+
+    public static void main(String[] args) throws IOException {
+        FileInputStream serviceAccount = new FileInputStream("path/to/your/hack1-416713-16398c46c7ba.json");
+
+        // Initialize Google Sheets API
+        GoogleCredential credentials = GoogleCredential.fromStream(serviceAccount)
+                .createScoped(Collections.singleton(SheetsScopes.SPREADSHEETS_READONLY));
+
+        // Create Google Sheets service
+        Sheets sheetsService = new Sheets.Builder(GoogleNetHttpTransport.newTrustedTransport(),
+                JacksonFactory.getDefaultInstance(), credentials)
+                .setApplicationName("Your Application Name").build();
+
+        // Define the spreadsheet ID and range
+        String spreadsheetId = "1";
+        String range = "Sheet1"; // Assuming your data is in the first sheet
+
+        // Retrieve the spreadsheet
+        ValueRange response = sheetsService.spreadsheets().values().get(spreadsheetId, range).execute();
+
+        List<List<Object>> values = response.getValues();
+
+        if (values == null || values.isEmpty()) {
+            System.out.println("No data found.");
+        } else {
+            System.out.println("Existing Data in Google Sheet:");
+            for (List<Object> row : values) {
+                System.out.println(row);
+            }
+        }
+
+        // Get user input for email and password
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter Email for Login: ");
+        String loginEmail = scanner.nextLine().trim();
+
+        System.out.print("Enter Password for Login: ");
+        String loginPassword = scanner.nextLine().trim();
+
+        // Check if login credentials are valid
+        boolean loginSuccessful = isLoginSuccessful(values, loginEmail, loginPassword);
+
+        if (loginSuccessful) {
+            System.out.println("Login successful!");
+        } else {
+            System.out.println("Login failed. Incorrect email or password.");
+        }
+    }
+
+    private static boolean isLoginSuccessful(List<List<Object>> values, String loginEmail, String loginPassword) {
+        for (List<Object> row : values) {
+            if (row.size() >= 2 && row.get(0).toString().equals(loginEmail) && row.get(1).toString().equals(loginPassword)) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
